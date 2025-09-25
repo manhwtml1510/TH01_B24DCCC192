@@ -1,53 +1,81 @@
-import { useState } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Link,
+  NavLink,
+  useNavigate,
+  Navigate,
+} from "react-router-dom";
 
-function App() {
-  const Question = [
-    { q: "ReactJs dùng để làm gì?",
-      options: ["Moblie App", "WebUI", "Hệ điều hành", "Cơ sở dữ liệu"],
-      answer :"WebUI"
+import {useState} from "react";
 
-    },
-    {
-      q: "Props trong React là gì?",
-      options: ["Trạng thái", "Thuộc tính truyền vào", "API", "CSS"],
-      answer: "Thuộc tính truyền vào"
-    },
-    {
-      q: "State dùng để?",
-      options: ["Quản lý dữ liệu thay đổi", "Định nghĩa Component","Kết nối Backend","Trang trí giao diện"],
-      answer: "Quản lý dữ liệu thay đổi"
-    }
-  ];
-  const [S, setS] = useState(0);
-  const [score, setScore] = useState(0);
-  const [show, setShow] = useState(false);
-  const handleAnswer = (option) => {
-    if (option === Question[S].answer) {
-      setScore(score + 1);
-      alert("Đáp án đúng");
-    } else {
-      alert("Đáp án sai");
-    }
-    if (S+1<Question.length) {
-      setS(S+1);
-    } else setShow(true);
-  };
-    return (
-    <div>
-      <h1>Bài 5: Quiz App</h1>
-      {show ? (
-        <p>Bạn trả lời đúng {score}/{Question.length} câu.</p>
-      ) : (
-        <>
-          <h3>{Question[S].q}</h3>
-          {Question[S].options.map((opt, idx) => (
-            <button key={idx} onClick={() => handleAnswer(opt)}>
-              {opt}
-            </button>
-          ))}
-        </>
-      )}
-    </div>
+function Home() {
+  return <h2>Giao diện trang Home</h2>;
+}
+
+function About() {
+  return <h2>Giao diện trang About</h2>;
+}
+
+function Dashboard() {
+  return <h2>Giao diện trang Dashboard (Chỉ cho user login)</h2>;
+}
+
+function Login({setAuth}) {
+  const navigate = useNavigate();
+  return (
+    <button
+      onClick={() => {
+        setAuth(true);
+        alert("Bạn đã đăng nhập thành công");
+        navigate("/about");
+      }}
+    >
+      Login
+    </button>
   );
 }
+
+function ProtectedPage({isAuth}) {
+  if (!isAuth) return <Navigate to="/login" replace />;
+  return <Dashboard />;
+}
+
+function CustomLink({to, label}) {
+  return (
+    <NavLink
+      to={to}
+      style={({isActive}) => ({
+        fontWeight: isActive ? "bold" : "normal",
+        color: isActive ? "green" : "blue",
+      })}
+    >
+      {label}
+    </NavLink>
+  );
+}
+
+function App() {
+  const [isAuth, setAuth] = useState(false);
+
+  return (
+    <BrowserRouter>
+      <nav style={{display: "flex", gap: "20px"}}>
+        <Link to="/">Home</Link>
+        <NavLink to="/about">About</NavLink>
+        <CustomLink to="/dashboard" label="Dashboard" />
+        {!isAuth && <Link to="/login">Login</Link>}
+      </nav>
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/login" element={<Login setAuth={setAuth} />} />
+        <Route path="/dashboard" element={<ProtectedPage isAuth={isAuth} />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
 export default App;
